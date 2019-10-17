@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 import pickledb
 import praw
 import configparser
+import schedule
+from time import sleep
 
 config = configparser.ConfigParser()
 config.read('conf.ini')
@@ -16,7 +18,10 @@ api_key = config['NEWS']['api_key']
 query = config['NEWS']['query']
 days = int(config['NEWS']['days'])
 sources = config['NEWS']['sources']
+interval = int(config['SETTINGS']['interval'])
+
 db = pickledb.load('data.db', False)
+newsapi = NewsApiClient(api_key=api_key)
 
 
 reddit = praw.Reddit(
@@ -28,15 +33,22 @@ reddit = praw.Reddit(
 )
 
 
-print(f"""{C.Y}
-╔╗╔╔═╗╦ ╦╔═╗  ╔═╗╔═╗╔═╗╔╦╗╔═╗╦═╗
-║║║║╣ ║║║╚═╗  ╠═╝║ ║╚═╗ ║ ║╣ ╠╦╝
-╝╚╝╚═╝╚╩╝╚═╝  ╩  ╚═╝╚═╝ ╩ ╚═╝╩╚═  {C.C}v1.0{C.W}
-""")
-
-
 class C:
     W, G, R, P, Y, C = '\033[0m', '\033[92m', '\033[91m', '\033[95m', '\033[93m', '\033[36m'
+
+
+if test_mode:
+    t = f'{C.R}TEST MODE{C.Y}'
+else:
+    t = ''
+
+print(f"""{C.Y}
+╔╗╔╔═╗╦ ╦╔═╗  ╔═╗╔═╗╔═╗╔╦╗╔═╗╦═╗
+║║║║╣ ║║║╚═╗  ╠═╝║ ║╚═╗ ║ ║╣ ╠╦╝  {t}
+╝╚╝╚═╝╚╩╝╚═╝  ╩  ╚═╝╚═╝ ╩ ╚═╝╩╚═  {C.C}v1.0{C.W}
+
+{C.P}Checking every {interval} hours{C.W}
+""")
 
 
 def do_db(title, url):
@@ -50,8 +62,7 @@ def do_db(title, url):
         return False
 
 
-def main():
-    newsapi = NewsApiClient(api_key=api_key)
+def runner():
     now = datetime.now()
     then = now - timedelta(days=days)
     now = now.strftime('%Y-%m-%d')
@@ -68,7 +79,18 @@ def main():
         if do_db(title, url):
             if not test_mode:
                 reddit.subreddit(target_subreddit).submit(title=title, url=url)
-            print(f'{title}\n')
+            print(f'{C.G}{title}{C.W}')
+        else:
+            print(f'{C.R}{title}{C.W}')
+
+
+def main():
+    runner()
+    if not test_mode:
+        schedule.every(interval).hours.do(runner)
+        while True:
+            schedule.run_pending()
+            sleep(1)
 
 
 if __name__ == '__main__':
