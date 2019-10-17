@@ -1,6 +1,6 @@
 ## News Poster
 
-Posts links to news articles to Reddit
+Posts links to recent news articles to Reddit
 
 ![](https://github.com/impshum/news-poster/blob/master/screenshot.jpg?raw=true)
 
