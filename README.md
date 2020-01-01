@@ -15,3 +15,7 @@ Posts links to recent news articles to Reddit
 #### Info
 
 Add/change sources from https://newsapi.org/sources (multiple can be added eg 'bbc-news, buzzfeed')
+
+---
+
+BTC - 1AYSiE7mhR9XshtS4mU2rRoAGxN8wSo4tK
